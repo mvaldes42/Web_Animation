@@ -21,6 +21,7 @@ A step by step series of examples that tell you how to get a development env run
 
 - Run `yarn start` to get a dev server
 - Run `yarn build` to build the website
+- Go to [localhost](http://localhost:1234/)
 
 ## Built With
 
