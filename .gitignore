@@ -1,0 +1,13 @@
+.DS_Store
+*.log
+node_modules
+dist
+lib
+es
+coverage
+.cache
+secrets.ts
+.cache
+.env
+cert.pem
+key.pem
