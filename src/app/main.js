@@ -1,6 +1,5 @@
 import THREE, {
     AmbientLight,
-    BackSide,
     Box3,
     BoxBufferGeometry,
     CameraHelper,
@@ -12,7 +11,6 @@ import THREE, {
     MeshStandardMaterial,
     NearestFilter,
     OrthographicCamera,
-    PerspectiveCamera,
     PlaneBufferGeometry,
     Points,
     PointsMaterial,
@@ -21,7 +19,6 @@ import THREE, {
     ShadowMaterial,
     SpotLight,
     TextureLoader,
-    Vector2,
     Vector3,
     WebGLRenderer
 } from 'three'
@@ -29,27 +26,21 @@ import OrbitControls from 'three-orbitcontrols'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 import _, { delay } from 'lodash'
 import gsap, { TimelineMax } from "gsap";
-
 import { EasePack } from "gsap/EasePack";
-gsap.registerPlugin(EasePack);
 
 import archiObjImport from '../assets/test.obj';
 
 // USE FOR CUBE TEXTURE // HEAVY
-
 // import textureImpDiff from '../assets/textures/concrete_diffuse.gif';
 // import textureImpNorm from '../assets/textures/concrete_norm.gif';
 // import textureImpDisp from '../assets/textures/concrete_disp.gif';
 // import textureImpOccl from '../assets/textures/concrete_occ.gif';
 // import textureImpRough from '../assets/textures/concrete_rough.gif';
 
-var archiObj
 var camera
 var controls
 var renderer
 var scene
-var dirLightScene
-var dirLightSceneHelper
 
 //GRID SETTINGS//
 var numberOfSquares = 1520;
@@ -185,6 +176,7 @@ function loadOBJ() {
 };
 
 var addObjInScene = function(object) {
+    var archiObj;
     archiObj = object;
     archiObj.position.x = archiObjPosX;
     archiObj.position.z = archiObjPosZ;
