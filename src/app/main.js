@@ -5,6 +5,7 @@ import THREE, {
     CameraHelper,
     Color,
     DoubleSide,
+    Geometry,
     GridHelper,
     LoadingManager,
     Mesh,
