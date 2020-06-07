@@ -155,7 +155,7 @@ export default function() {
     setUpLights(scene);
 
     // DOM again ?
-    document.body.innerHTML = ''
+    // document.body.innerHTML = ''
     document.body.appendChild(renderer.domElement);
 
     window.addEventListener('resize', onWindowResize, false);
@@ -168,7 +168,14 @@ export default function() {
     mouse.y = -(window.innerHeight) * 2 + 1;
     mouseRaycaster = new Raycaster();
     document.addEventListener('mousemove', onDocumentMouseMove, false);
+    document.addEventListener('DOMContentLoaded', (event) => {
+        document.getElementById("buttonNext").addEventListener("click", onButtonNextClick);
+    })
     createNewScene();
+}
+
+function onButtonNextClick() {
+
 }
 
 function drawBasePlanes() {

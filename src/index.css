@@ -8,6 +8,39 @@ body {
     width: 100%;
 }
 
+.buttonDiv {
+    background-color: white;
+    text-align: center;
+    position: absolute;
+    z-index: 1000;
+}
+
 canvas {
     display: block;
+    z-index: -1;
+    position: absolute;
+}
+
+button {
+    text-decoration: none;
+    font-size: 20px;
+}
+
+button:hover {
+    background-color: black;
+    color: white;
+}
+
+.previous {
+    background-color: lightgray;
+    color: black;
+}
+
+.next {
+    background-color: lightgray;
+    color: black;
+}
+
+.round {
+    border-radius: 50%;
 }
