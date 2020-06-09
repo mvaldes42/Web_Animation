@@ -1,30 +1,21 @@
-import THREE, {
+import {
     AmbientLight,
-    Box3,
     BoxBufferGeometry,
-    CameraHelper,
     Color,
     DoubleSide,
-    DirectionalLight,
     Geometry,
     GridHelper,
     LoadingManager,
     Mesh,
     MeshStandardMaterial,
-    MeshBasicMaterial,
-    NearestFilter,
     OrthographicCamera,
     PlaneBufferGeometry,
     Points,
-    PointLight,
-    PointLightHelper,
     PointsMaterial,
     Raycaster,
     Scene,
     ShadowMaterial,
     SpotLight,
-    SphereBufferGeometry,
-    TextureLoader,
     Vector2,
     Vector3,
     WebGLRenderer,
@@ -35,22 +26,41 @@ import _, { delay } from 'lodash'
 import gsap, { TimelineMax } from "gsap";
 import { EasePack } from "gsap/EasePack";
 
-import archiObjImport from '../assets/test.obj';
-
+import rainMeshObj from '../assets/rain_mesh.obj';
+import oasisMeshObj from '../assets/oasis_mesh.obj';
 
 var camera, controls, scene, renderer, mouseRaycaster;
 
 var mouse = new Vector2(),
     INTERSECTED;
 
+var currentProject = 'rain';
+
+var objList = {
+    rain: { name: 'rain', loadedObj: null, nextObjKey: 'oasis' },
+    oasis: { name: 'oasis', loadedObj: null, nextObjKey: 'rain' },
+}
+
+var orderedProjectKey = Object.keys(objList);
+
+var urlObj = {
+    rain: { importUrl: rainMeshObj },
+    oasis: { importUrl: oasisMeshObj }
+};
+
+var boxMeshFloorArray = [];
+var boxMeshUpArray = [];
+var boxMeshAllArray = [];
+var intersectArray;
+
 //GRID SETTINGS//
-var numberOfSquares = 1520;
-var rowNum = 40;
-var SquareLen = 2.5;
+var numberOfSquares = 3000;
+var rowNum = 60;
+var SquareLen = 2;
 var SquareWdth = SquareLen;
 var boxHoleNum = 1;
 
-var cubeYSize = 10;
+var cubeYSize = 20;
 
 //OBJ IMPORT PLACEMENT//
 var archiObjPosX = 65;
@@ -60,21 +70,14 @@ var archiObjPosZ = 50;
 var cameraPosSet = new Vector3(110, 94, 113);
 var frustumSize = 60;
 
-function onMouseMove(event) {
+// function displayPoint(point) {
 
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-}
-
-function displayPoint(point) {
-
-    var pointGeo = new Geometry();
-    pointGeo.vertices.push(point);
-    var pointMaterial = new PointsMaterial({ size: 8, sizeAttenuation: false, color: 0xF6831E });
-    var pointMesh = new Points(pointGeo, pointMaterial);
-    scene.add(pointMesh);
-}
+//     var pointGeo = new Geometry();
+//     pointGeo.vertices.push(point);
+//     var pointMaterial = new PointsMaterial({ size: 8, sizeAttenuation: false, color: 0xF6831E });
+//     var pointMesh = new Points(pointGeo, pointMaterial);
+//     scene.add(pointMesh);
+// }
 
 function setUpCamera() {
 
@@ -169,13 +172,31 @@ export default function() {
     mouseRaycaster = new Raycaster();
     document.addEventListener('mousemove', onDocumentMouseMove, false);
     document.addEventListener('DOMContentLoaded', (event) => {
-        document.getElementById("buttonNext").addEventListener("click", onButtonNextClick);
+        if (document.getElementById("buttonNext").disabled == false) {
+            document.getElementById("buttonNext").addEventListener("click", onButtonNextClick);
+            document.getElementById("buttonNext").disabled = true;
+            document.getElementById("buttonPrevious").disabled = true;
+        }
     })
-    createNewScene();
+    loadOBJ();
 }
 
 function onButtonNextClick() {
 
+    // // onClick
+    const currentProjectId = orderedProjectKey.findIndex((v) => v === currentProject);
+    if (currentProjectId < 0) {
+        return
+    }
+    var nextProjectId = (currentProjectId + 1) % orderedProjectKey.length;
+    currentProject = objList[orderedProjectKey[nextProjectId]].name;
+    if (objList[orderedProjectKey[nextProjectId]] && objList[orderedProjectKey[nextProjectId]].loadedObj) {
+        //add scene
+        resetScene(objList[orderedProjectKey[nextProjectId]].loadedObj);
+    } else {
+        loadOBJ();
+        // console.log('next is clicked');
+    }
 }
 
 function drawBasePlanes() {
@@ -194,19 +215,80 @@ function drawBasePlanes() {
     gridGeo.material.transparent = true;
     scene.add(gridGeo);
 }
-
-function createNewScene() {
-
-    drawBasePlanes();
-    loadOBJ();
-}
+// // init
+// var safeCurrentProject = currentProject;
+// if (objList[safeCurrentProject] && !objList[safeCurrentProject].loadedObj) {
+//     load(obj => {
+//         objList[safeCurrentProject].loadedObj = obj
+//     })
+// }
 
 function loadOBJ() {
 
     var manager = new LoadingManager();
     var loader = new OBJLoader(manager);
-    loader.load(archiObjImport, addObjInScene);
-};
+    var safeCurrentProject = currentProject;
+
+    if (!objList.oasis.loadedObj && !objList.rain.loadedObj) {
+        if (objList[safeCurrentProject] && !objList[safeCurrentProject].loadedObj) {
+            loader.load(urlObj[safeCurrentProject].importUrl, (obj) => {
+                objList[safeCurrentProject].loadedObj = obj;
+                createNewScene(obj);
+            });
+        };
+    } else if (objList[safeCurrentProject] && !objList[safeCurrentProject].loadedObj) {
+        loader.load(urlObj[safeCurrentProject].importUrl, (obj) => {
+            objList[safeCurrentProject].loadedObj = obj;
+            resetScene(obj);
+        });
+    };
+}
+
+function resetScene(objectObj) {
+    document.getElementById("buttonNext").disabled = true;
+    document.getElementById("buttonPrevious").disabled = true;
+    animateBackToOrigin();
+
+    setTimeout(() => {
+        boxMeshUpArray.splice(0, boxMeshUpArray.length);
+        var archiObjLoaded;
+        archiObjLoaded = addObjInScene(objectObj);
+        dispatchBoxMeshArray(boxMeshAllArray, archiObjLoaded);
+        animateBoxGeo();
+        disposeOfUnsused(archiObjLoaded);
+        // render();
+    }, 1850);
+}
+
+function animateBackToOrigin() {
+    var gsap = new TimelineMax().delay(.3);
+    gsap.smoothChildTiming = true;
+    let i = 0;
+    while (boxMeshUpArray[i]) {
+        var boxMesh = boxMeshUpArray[i];
+        var ease = "bounce.out";
+        gsap.to(boxMesh.material.color, { r: cubeFloorMaterial.color.r, g: cubeFloorMaterial.color.G, b: cubeFloorMaterial.color.b, duration: 1.5, ease: ease }, 0);
+        gsap.to(boxMesh.position, { y: 0.2 / 2, duration: 1.5, ease: ease }, 0);
+        gsap.to(boxMesh.scale, { y: 0.2 / cubeYSize, duration: 1.5, ease: ease }, 0);
+        scene.add(boxMesh);
+        i++;
+    }
+}
+var boxGeoArray;
+
+function createNewScene(objectObj) {
+
+    var archiObjLoaded;
+    drawBasePlanes();
+    archiObjLoaded = addObjInScene(objectObj);
+
+    boxGeoArray = createBoxGeoGrid();
+    drawBoxMesh();
+    dispatchBoxMeshArray(boxMeshAllArray, archiObjLoaded);
+    animateBoxGeo();
+    disposeOfUnsused(archiObjLoaded);
+    render();
+}
 
 var addObjInScene = function(object) {
     var archiObj;
@@ -220,28 +302,31 @@ var addObjInScene = function(object) {
             child.material.side = DoubleSide;
         }
     });
-    // Move those functions to createnewScene
-    var boxesGeoArray = dispatchBoxGeometry(createSquareGrid(), archiObj);
-    disposeOfUnsused(archiObj);
-    animateBoxGeo(boxesGeoArray);
-    render();
+    return (archiObj);
 };
 
 function disposeOfUnsused(archiObj) {
-    archiObj.dispose;
+    archiObj.traverse(function(child) {
+        if (child.geometry !== undefined) {
+            child.geometry.dispose();
+            child.material.dispose();
+        }
+    });
 }
 
-function drawBoxMesh(width, height, depth, i) {
+function drawBoxGeo(width, height, depth, i) {
+
     var boxGeo = new BoxBufferGeometry(width - boxHoleNum, height, depth - boxHoleNum, 1, 5, 1);
 
     var x = (width / 2) + ((i % rowNum) * SquareWdth);
     var y = -height / 2;
     var z = (depth / 2) + (Math.floor(i / rowNum) * SquareWdth);
     boxGeo.position = new Vector3(x, y, z);
+
     return (boxGeo);
 }
 
-function createSquareGrid() {
+function createBoxGeoGrid() {
 
     return _.range(numberOfSquares).map(function(i) {
 
@@ -250,39 +335,40 @@ function createSquareGrid() {
 
         var squareCenters = new Vector3(x, 0, z);
 
-        var boxGeoArray = drawBoxMesh(SquareWdth, cubeYSize, SquareLen, i);
+        var boxGeoArray = drawBoxGeo(SquareWdth, cubeYSize, SquareLen, i);
 
         return {
-            boxGeoArray: boxGeoArray,
             squareCenters,
+            boxGeoArray,
         }
     })
 }
 
-function findIntersectGridToObj(squareGrid, archiObj) {
+function findIntersectArray(archiObjLoaded) {
 
-    return squareGrid.map((square) => {
+    return boxGeoArray.map((box) => {
 
         var squareCentersPoints = new Vector3();
-        squareCentersPoints = square.squareCenters;
+        squareCentersPoints = box.squareCenters;
 
         var RayDirection = new Vector3(0, 1, 0)
         RayDirection.normalize();
-        archiObj.updateMatrixWorld();
+        archiObjLoaded.updateMatrixWorld();
 
         var raycaster = new Raycaster(squareCentersPoints, RayDirection);
-        var intersectArray = raycaster.intersectObject(archiObj, true);
+        var intersectArray = raycaster.intersectObject(archiObjLoaded, true);
         return {
             intersectArray,
         }
     })
 }
 
-function findDistanceArray(intersectArray) {
+function findDistanceArray() {
 
     return intersectArray.reduce((acc, distance) => {
-        if (distance.intersectArray[1]) {
-            acc.push(distance.intersectArray[1].distance);
+        if (distance.intersectArray[0]) {
+            var length = distance.intersectArray.length - 1;
+            acc.push(distance.intersectArray[length].distance);
         }
         return acc;
     }, [])
@@ -291,29 +377,30 @@ function findDistanceArray(intersectArray) {
 function findIntersectPointArray(intersectArray) {
 
     return intersectArray.reduce((acc, distance) => {
-        if (distance.intersectArray[1]) {
-            distance.intersectArray[1].point.y = 0;
-            acc.push(distance.intersectArray[1].point);
+        if (distance.intersectArray[0]) {
+            var length = distance.intersectArray.length - 1;
+            distance.intersectArray[length].point.y = 0;
+            acc.push(distance.intersectArray[length].point);
         }
         return acc;
     }, [])
 }
 
-function findBoxGeo(squareGrid) {
+function findBoxGeo() {
 
-    return squareGrid.reduce((acc, grid) => {
-        if (grid.boxGeoArray) {
-            acc.push(grid.boxGeoArray);
+    return boxGeoArray.reduce((acc, box) => {
+        if (box.boxGeoArray) {
+            acc.push(box.boxGeoArray);
         }
         return acc;
     }, [])
 }
 
-function findBoxGeoPoint(squareGrid) {
+function findBoxGeoPoint() {
 
-    return squareGrid.reduce((acc, grid) => {
-        if (grid.boxGeoArray) {
-            acc.push(grid.squareCenters);
+    return boxGeoArray.reduce((acc, box) => {
+        if (box.squareCenters) {
+            acc.push(box.squareCenters);
         }
         return acc;
     }, [])
@@ -336,107 +423,93 @@ function findIndexPoint(intersectPoint, boxGeoPoint) {
     return indexes;
 }
 
-function dispatchBoxGeometry(squareGrid, archiObj) {
+function dispatchBoxMeshArray(boxMeshAllArray, archiObjLoaded) {
 
-    var intersectArray = findIntersectGridToObj(squareGrid, archiObj);
-    var boxGeo = findBoxGeo(squareGrid);
-    var indexes = findIndexPoint(findIntersectPointArray(intersectArray), findBoxGeoPoint(squareGrid));
-
-    var boxGeoFloorArray = [];
-    var boxGeoUpArray = [];
+    intersectArray = findIntersectArray(archiObjLoaded);
+    // var boxGeo = findBoxGeo(squareGrid);
+    var indexes = findIndexPoint(findIntersectPointArray(intersectArray), findBoxGeoPoint());
 
     let i = 0;
 
     while (i < numberOfSquares) {
         if (indexes.includes(i)) {
-            boxGeoUpArray.push(boxGeo[i]);
+            boxMeshUpArray.push(boxMeshAllArray[i]);
         } else {
-            boxGeoFloorArray.push(boxGeo[i]);
+            boxMeshFloorArray.push(boxMeshAllArray[i]);
         }
         i++;
     }
-    return {
-        boxGeoFloorArray,
-        boxGeoUpArray,
-        intersectArray
-    }
 }
 
-var boxMeshFloorArray = [];
-var boxMeshUpArray = [];
+var cubeFloorMaterial = new MeshStandardMaterial({
+    side: DoubleSide,
+    color: 0x2D00F7,
+});
 
-function animateBoxGeo(boxesGeoArray) {
+function drawBoxMesh() {
+
+    let i = 0;
+
+    var boxGeo = findBoxGeo();
+
+    while (boxGeo[i]) {
+        var boxMesh = new Mesh(boxGeo[i], cubeFloorMaterial);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        boxMesh.position.copy(boxGeo[i].position);
+        scene.add(boxMesh);
+        boxMesh.position.y = 0.2 / 2;
+        boxMesh.scale.set(1, 0.2 / cubeYSize, 1);
+        scene.add(boxMesh);
+        boxMeshAllArray.push(boxMesh);
+        i++;
+    }
+
+
+}
+
+function animateBoxGeo() {
 
     var gsap = new TimelineMax().delay(.5);
+    gsap.smoothChildTiming = true;
 
-    var boxGeoFloorArray = boxesGeoArray.boxGeoFloorArray;
-    var boxGeoUpArray = boxesGeoArray.boxGeoUpArray;
-
-    var distanceArray = findDistanceArray(boxesGeoArray.intersectArray);
+    var distanceArray = findDistanceArray(intersectArray);
     var distanceMax = Math.max(...distanceArray);
     var distanceMin = Math.min(...distanceArray);
 
     let i = 0;
-    let j = 0;
 
-    while (boxGeoFloorArray[i]) {
-        var cubeFloorMaterial = new MeshStandardMaterial({
-            side: DoubleSide,
-            color: 0x2D00F7,
-        });
-        var boxMesh = new Mesh(boxGeoFloorArray[i], cubeFloorMaterial);
-        boxMesh.castShadow = true;
-        boxMesh.receiveShadow = true;
-        boxMesh.position.copy(boxGeoFloorArray[i].position);
-        scene.add(boxMesh);
-        boxMesh.position.y = 0.2 / 2;
-        boxMesh.scale.set(1, 0.2 / cubeYSize, 1);
-        scene.add(boxMesh);
-        boxMeshFloorArray.push(boxMesh);
-        i++;
-    }
-
-    i = 0;
-
-    while (boxGeoUpArray[i]) {
-
-        var cubeFloorMaterial = new MeshStandardMaterial({
-            side: DoubleSide,
-            color: 0x2D00F7,
-        });
-        var boxMesh = new Mesh(boxGeoUpArray[i], cubeFloorMaterial);
-        boxMesh.castShadow = true;
-        boxMesh.receiveShadow = true;
-        boxMesh.position.copy(boxGeoUpArray[i].position);
-        scene.add(boxMesh);
-        boxMesh.position.y = 0.2 / 2;
-        boxMesh.scale.set(1, 0.2 / cubeYSize, 1);
-        scene.add(boxMesh);
-        boxMeshUpArray.push(boxMesh);
-
-        var distance = distanceArray[j];
+    while (boxMeshUpArray[i]) {
+        var boxMesh = boxMeshUpArray[i];
+        var distance = distanceArray[i];
         var color = new Color(getColour('#2D00F7', '#F20089', distanceMin, distanceMax, distance));
         var cubeUpMaterial = new MeshStandardMaterial({
             side: DoubleSide,
-            color: color,
-            emissive: null,
-            emissiveIntensity: 0.3,
-            roughness: null,
-            wireframe: false,
+            color: 0x2D00F7,
 
         });
         boxMesh.material = cubeUpMaterial;
+        scene.add(boxMesh);
+        gsap.to(boxMesh.material.color, { r: color.r, b: color.b, g: color.g, duration: 1.5, ease: "elastic.out(1, 0.3)" }, 0);
         gsap.to(boxMesh.position, { y: distance / 2, duration: 1.5, ease: "elastic.out(1, 0.3)" }, 0);
         gsap.to(boxMesh.scale, { y: distance / cubeYSize, duration: 1.5, ease: "elastic.out(1, 0.3)" }, 0);
         scene.add(boxMesh);
-        boxMeshUpArray.push(boxMesh);
+        boxMeshUpArray[i] = boxMesh;
         i++;
-        j++;
     }
+    gsap.eventCallback("onComplete", () => {
+        document.getElementById("buttonNext").disabled = false;
+        document.getElementById("buttonPrevious").disabled = false;
+    });
 }
 
 var render = function() {
     var gsap2 = new TimelineMax();
+    gsap2.smoothChildTiming = true;
+
+    // renderer.info.autoReset = false;
+    // console.log(renderer.info);
+    console.log(document.getElementById("buttonNext").disabled);
 
     requestAnimationFrame(render);
 
@@ -473,35 +546,6 @@ var render = function() {
 
     renderer.render(scene, camera);
 };
-
-// USE FOR IF CUBES NEED A TEXTURE //
-
-// var loader = new TextureLoader();
-// loader.crossOrigin = "";
-// var textureNorm = loader.load(textureImpNorm);
-// var textureDis = loader.load(textureImpDisp);
-// var textureOccl = loader.load(textureImpOccl);
-// var textureRough = loader.load(textureImpRough);
-
-// loader.load(textureImpDiff, function(textureDiff) {
-//         textureDiff.minFilter = NearestFilter;
-//         var material = new MeshStandardMaterial({
-//             // map: textureDiff,
-//             // normalMap: textureNorm,
-//             // displacementMap: textureDis,
-//             // displacementBias: -0.6,
-//             // aoMap: textureOccl,
-//             // roughnessMap: textureRough,
-//             // side: DoubleSide,
-//             color: 0x6A00F4,
-//         });
-//         cube.geometry = boxGeo;
-//         cube.material = material;
-//         scene.add(cube);
-//     },
-//     function() { console.log("on progress") },
-//     function(error) { console.log(error) }
-// );
 
 function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
