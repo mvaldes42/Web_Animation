@@ -7,10 +7,10 @@ gsap@^3.3.0:
   resolved "https://registry.yarnpkg.com/gsap/-/gsap-3.3.0.tgz#1d3c94ad0e4c46742f5f751250afbdd238364ec5"
   integrity sha512-MIcLOH8HCGvjyuLpzNBMKK+GdoL9wmJU+8nwauSZkqTyDlI1ugD0Sbhu7HO3805u7NqSv811murbu6eipVhJqw==
 
-lodash@^4.17.15:
-  version "4.17.15"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
-  integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
+lodash@^4.17.19:
+  version "4.17.19"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.19.tgz#e48ddedbe30b3321783c5b4301fbd353bc1e4a4b"
+  integrity sha512-JNvd8XER9GQX0v2qJgsaN/mzFCNA5BRe/j8JN9d+tWyGLSodKQHKFicdwNYzWwI3wjRnaKPsGj1XkBjx/F96DQ==
 
 three-orbitcontrols@^2.110.3:
   version "2.110.3"
