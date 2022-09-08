@@ -25,9 +25,9 @@ A step by step series of examples that tell you how to get a development env run
 
 ## Built With
 
-* [Three.js](https://github.com/mrdoob/three.js/) - JavaScript 3D library
-* [GSAP](https://greensock.com/) - Animation for the web 
-* [Lodash](https://lodash.com/) - Utility library for js
+- [Three.js](https://github.com/mrdoob/three.js/) - JavaScript 3D library
+- [GSAP](https://greensock.com/) - Animation for the web
+- [Lodash](https://lodash.com/) - Utility library for js
 
 ## Color Palette
 
