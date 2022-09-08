@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "gsap": "^3.6.0",
-    "lodash": "^4.17.15",
-    "three": "^0.137.0",
+    "lodash": "^4.17.21",
+    "three": "^0.137.5",
     "three-orbitcontrols": "^2.110.3"
   },
   "devDependencies": {

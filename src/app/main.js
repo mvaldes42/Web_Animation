@@ -22,8 +22,8 @@ import {
 } from "three";
 import OrbitControls from "three-orbitcontrols";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
-import _, { delay, add } from "lodash";
-import { TimelineMax } from "gsap";
+import _ from "lodash";
+import { Timeline } from "gsap/gsap-core";
 
 import rainMeshObj from "url:../assets/rain_mesh.obj";
 import oasisMeshObj from "url:../assets/oasis_mesh.obj";
@@ -296,7 +296,7 @@ function resetScene(objectObj) {
 }
 
 function animateBackToOrigin() {
-  var gsap = new TimelineMax().delay(0.3);
+  var gsap = new Timeline().delay(0.3);
   gsap.smoothChildTiming = true;
 
   let i = 0;
@@ -559,7 +559,7 @@ function drawBoxMesh() {
 }
 
 function animateBoxGeo() {
-  var gsap = new TimelineMax().delay(0.5);
+  var gsap = new Timeline().delay(0.5);
   gsap.smoothChildTiming = true;
 
   var distanceArray = findDistanceArray(intersectArray);
@@ -658,7 +658,7 @@ function animateBoxGeo() {
 var mouseIntersects;
 
 var render = function () {
-  var gsap2 = new TimelineMax();
+  var gsap2 = new Timeline();
   gsap2.smoothChildTiming = true;
 
   // renderer.info.autoReset = false;

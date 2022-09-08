@@ -195,31 +195,12 @@
     "nullthrows" "^1.1.1"
     "semver" "^5.7.1"
 
-"@parcel/css-linux-x64-gnu@1.13.1":
-  "integrity" "sha512-4VsduFKs35J1I3iQJuBCTp66K5mLh8nrtfXzkBDgP9tc6cLqw9PFodby9NhW9SJSn0ZVdrciIXW0C8Lp3Ev+bw=="
-  "resolved" "https://registry.npmjs.org/@parcel/css-linux-x64-gnu/-/css-linux-x64-gnu-1.13.1.tgz"
-  "version" "1.13.1"
-
-"@parcel/css-linux-x64-musl@1.13.1":
-  "integrity" "sha512-Ws34m9fW/0UuNTkC359nbnURzvSbCsstRG6QQ3UxdeNJ+crrgEsmvHPcN3WiIz/P2seP1Hu6GobKQAnOy6g3HA=="
-  "resolved" "https://registry.npmjs.org/@parcel/css-linux-x64-musl/-/css-linux-x64-musl-1.13.1.tgz"
-  "version" "1.13.1"
-
 "@parcel/css@^1.12.2":
-  "integrity" "sha512-pDv+1tPCk2ggGZ1Msl4r+lq7dPKjUBpZXJf/DMydTnYPxupwAjtmlmOd67CF3QHVLyKYB+viU4g5M8pVXCbaeA=="
-  "resolved" "https://registry.npmjs.org/@parcel/css/-/css-1.13.1.tgz"
-  "version" "1.13.1"
+  "integrity" "sha512-r5tJWe6NF6lesfPw1N3g7N7WUKpHqi2ONnw9wl5ccSGGIxkmgcPaPQxfvmhdjXvQnktSuIOR0HjQXVXu+/en/w=="
+  "resolved" "https://registry.npmjs.org/@parcel/css/-/css-1.14.0.tgz"
+  "version" "1.14.0"
   dependencies:
-    "detect-libc" "^1.0.3"
-  optionalDependencies:
-    "@parcel/css-darwin-arm64" "1.13.1"
-    "@parcel/css-darwin-x64" "1.13.1"
-    "@parcel/css-linux-arm-gnueabihf" "1.13.1"
-    "@parcel/css-linux-arm64-gnu" "1.13.1"
-    "@parcel/css-linux-arm64-musl" "1.13.1"
-    "@parcel/css-linux-x64-gnu" "1.13.1"
-    "@parcel/css-linux-x64-musl" "1.13.1"
-    "@parcel/css-win32-x64-msvc" "1.13.1"
+    "lightningcss" "^1.14.0"
 
 "@parcel/diagnostic@2.7.0":
   "integrity" "sha512-pdq/cTwVoL0n8yuDCRXFRSQHVWdmmIXPt3R3iT4KtYDYvOrMT2dLPT79IMqQkhYPANW8GuL15n/WxRngfRdkug=="
@@ -1016,6 +997,32 @@
   "resolved" "https://registry.npmjs.org/json5/-/json5-2.2.1.tgz"
   "version" "2.2.1"
 
+"lightningcss-linux-x64-gnu@1.14.0":
+  "integrity" "sha512-+dcNezLgUdAozcc6c0YSnZyRcOpro/yOOdy6ZjIwQtxej/5sEVJhXWbyHhdwSSlJssg/d+/7ihxEJIdZ8oDIfw=="
+  "resolved" "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.14.0.tgz"
+  "version" "1.14.0"
+
+"lightningcss-linux-x64-musl@1.14.0":
+  "integrity" "sha512-TI8tIaYv6SBpoBGatCG8gKQMxMCUcc+rvBSrqU7geHFBwzzyxOEHflENMclfwiYjTEM/HMdgJbWuHsIY3xvkuQ=="
+  "resolved" "https://registry.npmjs.org/lightningcss-linux-x64-musl/-/lightningcss-linux-x64-musl-1.14.0.tgz"
+  "version" "1.14.0"
+
+"lightningcss@^1.14.0":
+  "integrity" "sha512-Vwa1JWiLGRLntf4TXRu/zF2RaHRfJjbZwUzkl2C4LhnRQzsEwkyeAQjAxtpJ5NDnVVUf10q1olEzkFF4AWZLOw=="
+  "resolved" "https://registry.npmjs.org/lightningcss/-/lightningcss-1.14.0.tgz"
+  "version" "1.14.0"
+  dependencies:
+    "detect-libc" "^1.0.3"
+  optionalDependencies:
+    "lightningcss-darwin-arm64" "1.14.0"
+    "lightningcss-darwin-x64" "1.14.0"
+    "lightningcss-linux-arm-gnueabihf" "1.14.0"
+    "lightningcss-linux-arm64-gnu" "1.14.0"
+    "lightningcss-linux-arm64-musl" "1.14.0"
+    "lightningcss-linux-x64-gnu" "1.14.0"
+    "lightningcss-linux-x64-musl" "1.14.0"
+    "lightningcss-win32-x64-msvc" "1.14.0"
+
 "lines-and-columns@^1.1.6":
   "integrity" "sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg=="
   "resolved" "https://registry.npmjs.org/lines-and-columns/-/lines-and-columns-1.2.4.tgz"
@@ -1039,7 +1046,7 @@
     "@lmdb/lmdb-linux-x64" "2.5.2"
     "@lmdb/lmdb-win32-x64" "2.5.2"
 
-"lodash@^4.17.15":
+"lodash@^4.17.21":
   "integrity" "sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg=="
   "resolved" "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz"
   "version" "4.17.21"
@@ -1293,7 +1300,7 @@
   "resolved" "https://registry.npmjs.org/three-orbitcontrols/-/three-orbitcontrols-2.110.3.tgz"
   "version" "2.110.3"
 
-"three@^0.137.0", "three@>= 0.110.0":
+"three@^0.137.5", "three@>= 0.110.0":
   "integrity" "sha512-rTyr+HDFxjnN8+N/guZjDgfVxgHptZQpf6xfL/Mo7a5JYIFwK6tAq3bzxYYB4Ae0RosDZlDuP+X5aXDXz+XnHQ=="
   "resolved" "https://registry.npmjs.org/three/-/three-0.137.5.tgz"
   "version" "0.137.5"
