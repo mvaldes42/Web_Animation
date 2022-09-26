@@ -17,6 +17,9 @@
     "three-orbitcontrols": "^2.110.3"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.185",
+    "@types/node": "^18.7.19",
+    "@types/webpack-env": "^1.18.0",
     "parcel": "^2.7.0",
     "prettier": "2.7.1"
   }
