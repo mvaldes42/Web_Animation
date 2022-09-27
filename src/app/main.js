@@ -7,8 +7,9 @@ import {
   GridHelper,
   LoadingManager,
   Mesh,
+  MeshBasicMaterial,
+  MeshNormalMaterial,
   MeshStandardMaterial,
-  OrthographicCamera,
   PlaneBufferGeometry,
   Points,
   PointsMaterial,
@@ -18,7 +19,6 @@ import {
   SpotLight,
   Vector2,
   Vector3,
-  WebGLRenderer,
 } from "three";
 import OrbitControls from "three-orbitcontrols";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
@@ -28,6 +28,7 @@ import { Timeline } from "gsap/gsap-core";
 import rainMeshObj from "url:../assets/rain_mesh.obj";
 import oasisMeshObj from "url:../assets/oasis_mesh.obj";
 import nestMeshObj from "url:../assets/nest_mesh.obj";
+import { setUpCamera, setUpRenderer, setUpLights } from "./setUpScene";
 
 var camera, controls, scene, renderer, mouseRaycaster;
 
@@ -86,64 +87,6 @@ var cubeFloorMaterial = new MeshStandardMaterial({
   color: 0xffffff,
 });
 
-function displayPoint(point) {
-  var pointGeo = new Geometry();
-  pointGeo.vertices.push(point);
-  var pointMaterial = new PointsMaterial({
-    size: 8,
-    sizeAttenuation: false,
-    color: 0xf6831e,
-  });
-  var pointMesh = new Points(pointGeo, pointMaterial);
-  scene.add(pointMesh);
-}
-
-function setUpCamera() {
-  var aspect = window.innerWidth / window.innerHeight;
-
-  camera = new OrthographicCamera(
-    (frustumSize * aspect) / -2,
-    (frustumSize * aspect) / 2,
-    frustumSize / 2,
-    frustumSize / -2,
-    1,
-    1000
-  );
-  camera.position.copy(cameraPosSet);
-  camera.rotation.order = "YXZ";
-  camera.rotation.y = -Math.PI / 4;
-  camera.rotation.x = Math.atan(-1 / Math.sqrt(2));
-  scene.add(camera);
-}
-
-function setUpRenderer() {
-  renderer = new WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.shadowMap.enabled = true;
-}
-
-function setUpLights(scene) {
-  scene.add(new AmbientLight(0xf0f0f0, 0.7));
-  var light = new SpotLight(0xffffff, 1);
-  light.position.set(0, 100, archiObjPosZ + 100);
-  light.angle = Math.PI * 0.2;
-  light.castShadow = true;
-  light.shadow.camera.near = 50;
-  light.shadow.camera.far = 200;
-  light.shadow.bias = -0.0027;
-  light.shadow.mapSize.width = 1080;
-  light.shadow.mapSize.height = 1080;
-  scene.add(light);
-
-  light.target.position.set(archiObjPosX, 0, archiObjPosZ);
-  scene.add(light.target);
-
-  // var shadowCameraHelper = new CameraHelper(light.shadow.camera);
-  // shadowCameraHelper.visible = true;
-  // scene.add(shadowCameraHelper);
-}
-
 function onWindowResize() {
   var aspect = window.innerHeight / window.innerWidth;
 
@@ -164,7 +107,6 @@ function onDocumentMouseMove(event) {
 }
 
 export default function () {
-  // make DOM elements:
   var container = document.createElement("div");
   document.body.appendChild(container);
 
@@ -172,12 +114,16 @@ export default function () {
   container.appendChild(info);
 
   scene = new Scene();
-  setUpCamera();
-  setUpRenderer();
-  setUpLights(scene);
+  camera = setUpCamera(camera, frustumSize, cameraPosSet);
+  scene.add(camera);
+  renderer = setUpRenderer(render);
+  scene.add(new AmbientLight(0xf0f0f0, 0.7));
+  var light = new SpotLight(0xffffff, 1);
+  light = setUpLights(light, archiObjPosZ);
+  scene.add(light);
+  light.target.position.set(archiObjPosX, 0, archiObjPosZ);
+  scene.add(light.target);
 
-  // DOM again ?
-  // document.body.innerHTML = ''
   document.body.appendChild(renderer.domElement);
 
   window.addEventListener("resize", onWindowResize, false);
@@ -203,7 +149,6 @@ export default function () {
 }
 
 function onButtonNextClick() {
-  // // onClick
   const currentProjectId = orderedProjectKey.findIndex(
     (v) => v === currentProject
   );
@@ -215,37 +160,32 @@ function onButtonNextClick() {
   if (
     objList[orderedProjectKey[nextProjectId]] &&
     objList[orderedProjectKey[nextProjectId]].loadedObj
-  ) {
-    //add scene
+  )
     resetScene(objList[orderedProjectKey[nextProjectId]].loadedObj);
-  } else {
-    loadOBJ();
-    // console.log('next is clicked');
-  }
+  else loadOBJ();
 }
 
 function drawBasePlanes() {
   var planeGeo = new PlaneBufferGeometry(2000, 2000);
   planeGeo.rotateX(-Math.PI / 2);
-  var planeMaterial = new ShadowMaterial({ opacity: 0.3 });
+  var shadow = new ShadowMaterial({ opacity: 0.3 });
+  var shadowPlane = new Mesh(planeGeo, shadow);
+  shadowPlane.position.y = 0.01;
+  shadowPlane.receiveShadow = true;
+  scene.add(shadowPlane);
+
+  var planeMaterial = new MeshBasicMaterial({});
   var plane = new Mesh(planeGeo, planeMaterial);
-  plane.position.y = -0.02;
+  plane.position.y = 0;
   plane.receiveShadow = true;
   scene.add(plane);
 
   var gridGeo = new GridHelper(2000, 100);
-  gridGeo.position.y = -0.01;
+  gridGeo.position.y = 0.011;
   gridGeo.material.opacity = 0.25;
   gridGeo.material.transparent = true;
   scene.add(gridGeo);
 }
-// // init
-// var safeCurrentProject = currentProject;
-// if (objList[safeCurrentProject] && !objList[safeCurrentProject].loadedObj) {
-//     load(obj => {
-//         objList[safeCurrentProject].loadedObj = obj
-//     })
-// }
 
 function loadOBJ() {
   var manager = new LoadingManager();
@@ -291,7 +231,6 @@ function resetScene(objectObj) {
     dispatchBoxMeshArray(boxMeshAllArray, archiObjLoaded);
     animateBoxGeo();
     disposeOfUnsused(archiObjLoaded);
-    // render();
   }, 1850);
 }
 
@@ -322,9 +261,7 @@ function animateBackToOrigin() {
     );
     scene.add(boxMesh);
 
-    // SOCLE
     var socleMesh = socleMeshArray[i];
-    // gsap.to(socleMesh.material.color, { r: 255, g: 255, b: 255, duration: 1.5, ease: ease }, 0);
     gsap.to(socleMesh.position, { y: 0, duration: 1.5, ease: ease }, 0);
     gsap.to(socleMesh.scale, { y: 0, duration: 1.5, ease: ease }, 0);
     scene.add(socleMesh);
@@ -346,7 +283,6 @@ function createNewScene(objectObj) {
   var archiObjLoaded;
   drawBasePlanes();
   archiObjLoaded = addObjInScene(objectObj);
-  // scene.add(archiObjLoaded);
 
   boxGeoArray = createBoxGeoGrid();
   drawBoxMesh();
@@ -364,8 +300,6 @@ var addObjInScene = function (object) {
   object.traverse(function (child) {
     if (child instanceof Mesh) {
       child.material.color = new Color(0x8d9db6);
-      // child.material.transparent = true;
-      // child.material.opacity = 0.5;
       child.geometry.computeVertexNormals();
       child.material.side = DoubleSide;
     }
@@ -438,11 +372,6 @@ function findDistanceArray() {
   var j = 0;
 
   return intersectArray.reduce((acc, distance) => {
-    // var k = 0;
-    // while (distance.intersectArray[k]) {
-    //     displayPoint(distance.intersectArray[k].point);
-    //     k++;
-    // }
     if (distance.intersectArray[0] && distance.intersectArray.length >= 2) {
       var i = 0;
       var distanceY = [];
@@ -478,7 +407,6 @@ function findDistanceArray() {
 function findIntersectPointArray(intersectArray) {
   return intersectArray.reduce((acc, distance) => {
     if (distance.intersectArray[0] && distance.intersectArray.length >= 2) {
-      // var length = distance.intersectArray.length - 1;
       distance.intersectArray[0].point.y = 0;
       acc.push(distance.intersectArray[0].point);
     }
@@ -573,14 +501,13 @@ function animateBoxGeo() {
     var socleMesh = boxMeshUpArray[i].clone();
     var socleMaterial = new MeshStandardMaterial({
       side: DoubleSide,
-      color: 0xf5f5f5,
+      color: 0xf7fdfe,
       transparent: true,
-      opacity: 0.2,
-      // roughness: 0.7,
-      metalness: 0.1,
+      opacity: 0.6,
+      // metalness: 0.1,
     });
-    socleMesh.castShadow = false;
-    socleMesh.receiveShadow = false;
+    socleMesh.castShadow = true;
+    socleMesh.receiveShadow = true;
     socleMesh.material = socleMaterial;
     socleMesh.y = 0;
     socleMesh.position.y = 0;
@@ -604,13 +531,11 @@ function animateBoxGeo() {
     scene.add(socleMesh);
     socleMeshArray[i] = socleMesh;
 
-    // MAIN
-
     var boxMesh = boxMeshUpArray[i];
     var distance = distanceArray[i];
 
     var color = new Color(
-      getColour("#FFFFFF", "#F20089", distanceMin, distanceMax, maxYArray[i])
+      getColour("#85B4FF", "#9b5de5", distanceMin, distanceMax, maxYArray[i])
     );
     var cubeUpMaterial = new MeshStandardMaterial({
       side: DoubleSide,
@@ -661,10 +586,6 @@ var render = function () {
   var gsap2 = new Timeline();
   gsap2.smoothChildTiming = true;
 
-  // renderer.info.autoReset = false;
-  // console.log(renderer.info);
-  // console.log(document.getElementById("buttonNext").disabled);
-
   requestAnimationFrame(render);
 
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -677,9 +598,6 @@ var render = function () {
 
   if (mouseIntersects.length > 0) {
     if (INTERSECTED != mouseIntersects[0].object) {
-      // if (INTERSECTED) INTERSECTED.material.emissive = INTERSECTED.currentHex;
-      // if (INTERSECTED) INTERSECTED.material.wireframe = INTERSECTED.currenWire;
-
       INTERSECTED = mouseIntersects[0].object;
 
       if (!INTERSECTED.truePosY) {
@@ -695,15 +613,8 @@ var render = function () {
         { y: INTERSECTED.truePosY, duration: 1, ease: "elastic.out(1, 0.3)" },
         0.3
       );
-
-      // INTERSECTED.currentHex = INTERSECTED.material.emissive;
-      // INTERSECTED.currenWire = INTERSECTED.material.wireframe;
-      // INTERSECTED.material.emissive = INTERSECTED.material.color;
-      // INTERSECTED.material.wireframe = true;
     }
   } else {
-    // if (INTERSECTED) INTERSECTED.material.emissive = INTERSECTED.currentHex;
-    // if (INTERSECTED) INTERSECTED.material.wireframe = INTERSECTED.currenWire;
     INTERSECTED = null;
   }
 
