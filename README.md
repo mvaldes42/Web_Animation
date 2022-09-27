@@ -1,6 +1,10 @@
+![Screen recording](img/screen_recorder.gif)
+
 # Web Animation
 
-Web Animation is a project to try and learn JavaScript in order to implement it in my personal porfotlio website.
+Web Animation is a project that I have done in 2020, before I've learned how to code for the web.
+It displays 3D models that I've done during my architect years. The goal was to find a fun way to browse between projects in my portfolio.
+
 It uses Three.js as a lib for WebGL & GSAP for timeline animation uses.
 
 ## Getting Started
@@ -29,6 +33,15 @@ A step by step series of examples that tell you how to get a development env run
 - [GSAP](https://greensock.com/) - Animation for the web
 - [Lodash](https://lodash.com/) - Utility library for js
 
-## Color Palette
+## What I've learned
 
-- See color palette used [here](https://coolors.co/2d00f7-6a00f4-8900f2-a100f2-b100e8-bc00dd-d100d1-db00b6-e500a4-f20089).
+- introduction to HTML, JS, Three.js and GSAP.
+- 3D modeling, lights, camera, renderer, raycasting for the web.
+- Create animations with mouse interactions.
+- Find playfull ways to display 3D for the user.
+
+## Screenshots
+
+<img src="img/example1.png" alt="example1" width="500"/>
+&nbsp;&nbsp;
+<img src="img/example2.png" alt="example2" width="500"/>
